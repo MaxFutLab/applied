@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 export type GeolocationSnapshot = {
   latitude: number
@@ -9,15 +9,29 @@ export type GeolocationSnapshot = {
 
 type GeolocationPermissionStatus = PermissionState | 'unsupported' | 'unknown'
 
+export type GeolocationCaptureStatus =
+  | 'idle'
+  | 'loading'
+  | 'success'
+  | 'error'
+  | 'permission-denied'
+  | 'unsupported'
+
 type UseGeolocationResult = {
   currentLocation: GeolocationSnapshot | null
   errorMessage: string | null
   isLoading: boolean
   permissionStatus: GeolocationPermissionStatus
+  status: GeolocationCaptureStatus
   captureLocation: () => Promise<GeolocationSnapshot | null>
 }
 
-export function useGeolocation(): UseGeolocationResult {
+type UseGeolocationOptions = {
+  autoStart?: boolean
+}
+
+export function useGeolocation(options: UseGeolocationOptions = {}): UseGeolocationResult {
+  const { autoStart = true } = options
   const geolocationSupported = typeof navigator !== 'undefined' && 'geolocation' in navigator
   const [currentLocation, setCurrentLocation] = useState<GeolocationSnapshot | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(
@@ -26,6 +40,9 @@ export function useGeolocation(): UseGeolocationResult {
   const [isLoading, setIsLoading] = useState(false)
   const [permissionStatus, setPermissionStatus] = useState<GeolocationPermissionStatus>(
     geolocationSupported ? 'unknown' : 'unsupported',
+  )
+  const [status, setStatus] = useState<GeolocationCaptureStatus>(
+    geolocationSupported ? 'idle' : 'unsupported',
   )
 
   useEffect(() => {
@@ -47,7 +64,23 @@ export function useGeolocation(): UseGeolocationResult {
         }
 
         setPermissionStatus(status.state)
-        status.onchange = () => setPermissionStatus(status.state)
+        if (status.state === 'denied') {
+          setStatus('permission-denied')
+          setErrorMessage(
+            'Permissao de localizacao negada. Libere a localizacao para concluir o check-in.',
+          )
+        }
+        status.onchange = () => {
+          setPermissionStatus(status.state)
+
+          if (status.state === 'denied') {
+            setStatus('permission-denied')
+            setErrorMessage(
+              'Permissao de localizacao negada. Libere a localizacao para concluir o check-in.',
+            )
+            setCurrentLocation(null)
+          }
+        }
       })
       .catch(() => {
         setPermissionStatus('unknown')
@@ -61,11 +94,13 @@ export function useGeolocation(): UseGeolocationResult {
   const captureLocation = useCallback(async () => {
     if (!geolocationSupported) {
       setPermissionStatus('unsupported')
+      setStatus('unsupported')
       setErrorMessage('Geolocalizacao nao suportada neste dispositivo.')
       return null
     }
 
     setIsLoading(true)
+    setStatus('loading')
     setErrorMessage(null)
 
     const result = await new Promise<GeolocationSnapshot | null>((resolve) => {
@@ -78,12 +113,25 @@ export function useGeolocation(): UseGeolocationResult {
             timestampLocal: new Date(position.timestamp).toISOString(),
           }
 
+          setPermissionStatus('granted')
           setCurrentLocation(snapshot)
+          setStatus('success')
           setIsLoading(false)
           resolve(snapshot)
         },
         (error) => {
-          setErrorMessage(error.message || 'Nao foi possivel obter a localizacao.')
+          const denied = error.code === error.PERMISSION_DENIED
+
+          setCurrentLocation(null)
+          setPermissionStatus((currentPermissionStatus) =>
+            denied ? 'denied' : currentPermissionStatus,
+          )
+          setStatus(denied ? 'permission-denied' : 'error')
+          setErrorMessage(
+            denied
+              ? 'Permissao de localizacao negada. Libere a localizacao para concluir o check-in.'
+              : error.message || 'Nao foi possivel obter a localizacao.',
+          )
           setIsLoading(false)
           resolve(null)
         },
@@ -98,14 +146,24 @@ export function useGeolocation(): UseGeolocationResult {
     return result
   }, [geolocationSupported])
 
-  return useMemo(
-    () => ({
-      currentLocation,
-      errorMessage,
-      isLoading,
-      permissionStatus,
-      captureLocation,
-    }),
-    [captureLocation, currentLocation, errorMessage, isLoading, permissionStatus],
-  )
+  useEffect(() => {
+    if (!autoStart || !geolocationSupported) {
+      return
+    }
+
+    const timerId = window.setTimeout(() => {
+      void captureLocation()
+    }, 0)
+
+    return () => window.clearTimeout(timerId)
+  }, [autoStart, captureLocation, geolocationSupported])
+
+  return {
+    currentLocation,
+    errorMessage,
+    isLoading,
+    permissionStatus,
+    status,
+    captureLocation,
+  }
 }

@@ -24,10 +24,17 @@ export type AttendanceRecord = {
   remoteId?: string
   patientId: string
   patientName: string
+  patient_name: string
   professionalId: string
   professionalName: string
   checkType: CheckType
+  check_type: CheckType
   notes: string
+  latitude: number
+  longitude: number
+  accuracy_meters: number
+  location_permission: string
+  client_created_at: string
   recordedAt: string
   createdAt: string
   updatedAt: string

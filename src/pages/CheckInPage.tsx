@@ -14,8 +14,9 @@ export function CheckInPage() {
   const [notes, setNotes] = useState('')
   const [currentTime, setCurrentTime] = useState(new Date().toISOString())
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null)
-  const { captureLocation, currentLocation, errorMessage, isLoading, permissionStatus } =
-    useGeolocation()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { captureLocation, currentLocation, errorMessage, isLoading, permissionStatus, status } =
+    useGeolocation({ autoStart: true })
 
   useEffect(() => {
     const timerId = window.setInterval(() => {
@@ -27,6 +28,7 @@ export function CheckInPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    setFeedbackMessage(null)
 
     const selectedPatient = patients.find((patient) => patient.id === selectedPatientId)
 
@@ -35,38 +37,66 @@ export function CheckInPage() {
       return
     }
 
+    if (permissionStatus === 'denied') {
+      setFeedbackMessage('O check-in esta bloqueado porque a permissao de localizacao foi negada.')
+      return
+    }
+
+    if (currentLocation?.latitude == null || currentLocation.longitude == null) {
+      setFeedbackMessage('O check-in so pode continuar quando a localizacao for capturada com sucesso.')
+      return
+    }
+
+    setIsSubmitting(true)
+
     const record: AttendanceRecord = {
       localId: uuidv4(),
       patientId: selectedPatient.id,
       patientName: selectedPatient.name,
+      patient_name: selectedPatient.name,
       professionalId: 'at-001',
       professionalName: 'AT Responsavel',
       checkType: 'check-in',
+      check_type: 'check-in',
       notes: notes.trim(),
+      latitude: currentLocation.latitude,
+      longitude: currentLocation.longitude,
+      accuracy_meters: currentLocation.accuracy,
+      location_permission: permissionStatus,
+      client_created_at: new Date().toISOString(),
       recordedAt: currentTime,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       syncStatus: 'pending',
-      location: currentLocation
-        ? {
-            latitude: currentLocation.latitude,
-            longitude: currentLocation.longitude,
-            accuracy: currentLocation.accuracy,
-            timestampLocal: currentLocation.timestampLocal,
-          }
-        : null,
+      location: {
+        latitude: currentLocation.latitude,
+        longitude: currentLocation.longitude,
+        accuracy: currentLocation.accuracy,
+        timestampLocal: currentLocation.timestampLocal,
+      },
     }
 
-    await createLocalAttendanceRecord(record)
-
-    setNotes('')
-    setFeedbackMessage('Check-in salvo localmente com sucesso.')
+    try {
+      await createLocalAttendanceRecord(record)
+      setNotes('')
+      setFeedbackMessage('Check-in salvo localmente com sucesso.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
+
+  const canSubmit =
+    status === 'success' &&
+    permissionStatus !== 'denied' &&
+    currentLocation?.latitude != null &&
+    currentLocation.longitude != null &&
+    !isLoading &&
+    !isSubmitting
 
   return (
     <PageSection
       title="Check-in"
-      description="Registre o inicio do atendimento mesmo sem internet."
+      description="A localizacao e capturada automaticamente e o check-in so continua quando ela estiver valida."
     >
       <form className="form-layout" onSubmit={handleSubmit}>
         <label className="field">
@@ -99,33 +129,39 @@ export function CheckInPage() {
         </div>
 
         <div className="status-box">
-          <strong>Permissao de localizacao</strong>
-          <span>{permissionStatus}</span>
+          <strong>Status da localizacao</strong>
+          <span>{getStatusLabel(status)}</span>
         </div>
 
-        <div className="inline-actions">
-          <button type="button" className="secondary-button" onClick={() => void captureLocation()}>
-            {isLoading ? 'Capturando localizacao...' : 'Capturar localizacao'}
-          </button>
+        <div className="status-box">
+          <strong>Permissao de localizacao</strong>
+          <span>{getPermissionLabel(permissionStatus)}</span>
         </div>
 
         <div className="status-box">
           <strong>Localizacao atual</strong>
           {currentLocation ? (
-            <span>
-              Lat {currentLocation.latitude.toFixed(6)} | Long {currentLocation.longitude.toFixed(6)}
-              {' | '}Precisao {Math.round(currentLocation.accuracy)}m
-            </span>
+            <div className="status-detail-list">
+              <span>Latitude: {currentLocation.latitude.toFixed(6)}</span>
+              <span>Longitude: {currentLocation.longitude.toFixed(6)}</span>
+              <span>Accuracy: {Math.round(currentLocation.accuracy)} m</span>
+            </div>
           ) : (
-            <span>Nenhuma localizacao capturada ainda.</span>
+            <span>Nenhuma localizacao valida capturada ainda.</span>
           )}
+        </div>
+
+        <div className="inline-actions">
+          <button type="button" className="secondary-button" onClick={() => void captureLocation()}>
+            {isLoading ? 'Capturando localizacao...' : 'Tentar novamente'}
+          </button>
         </div>
 
         {errorMessage ? <p className="feedback error">{errorMessage}</p> : null}
         {feedbackMessage ? <p className="feedback success">{feedbackMessage}</p> : null}
 
-        <button type="submit" className="primary-button">
-          Confirmar check-in
+        <button type="submit" className="primary-button" disabled={!canSubmit}>
+          {isSubmitting ? 'Salvando check-in...' : 'Confirmar check-in'}
         </button>
       </form>
     </PageSection>
@@ -137,4 +173,36 @@ function formatDateTime(value: string) {
     dateStyle: 'short',
     timeStyle: 'medium',
   }).format(new Date(value))
+}
+
+function getStatusLabel(status: ReturnType<typeof useGeolocation>['status']) {
+  switch (status) {
+    case 'loading':
+      return 'Capturando localizacao...'
+    case 'success':
+      return 'Localizacao capturada com sucesso.'
+    case 'permission-denied':
+      return 'Permissao negada.'
+    case 'error':
+      return 'Erro ao capturar localizacao.'
+    case 'unsupported':
+      return 'Geolocalizacao nao suportada.'
+    default:
+      return 'Aguardando captura da localizacao.'
+  }
+}
+
+function getPermissionLabel(permissionStatus: ReturnType<typeof useGeolocation>['permissionStatus']) {
+  switch (permissionStatus) {
+    case 'granted':
+      return 'Permitida'
+    case 'denied':
+      return 'Negada'
+    case 'prompt':
+      return 'Aguardando autorizacao'
+    case 'unsupported':
+      return 'Nao suportada'
+    default:
+      return 'Indefinida'
+  }
 }
