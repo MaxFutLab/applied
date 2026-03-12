@@ -35,6 +35,12 @@ export async function listPendingAttendanceRecords() {
   return database.getAllFromIndex(ATTENDANCE_STORE, 'by-sync-status', 'pending')
 }
 
+export async function listQueuedAttendanceRecords() {
+  const database = await getDatabase()
+  const records = await database.getAll(ATTENDANCE_STORE)
+  return records.filter((record) => record.syncStatus === 'pending' || record.syncStatus === 'error')
+}
+
 export async function markAttendanceAsSynced(localId: string, remoteId?: string) {
   const database = await getDatabase()
   const record = await database.get(ATTENDANCE_STORE, localId)

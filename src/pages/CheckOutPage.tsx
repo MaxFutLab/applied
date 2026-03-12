@@ -1,19 +1,11 @@
-import { Link } from 'react-router-dom'
-import { PageSection } from '../components/PageSection'
+import { AttendanceForm } from '../components/AttendanceForm'
 
 export function CheckOutPage() {
   return (
-    <PageSection
+    <AttendanceForm
+      checkType="check-out"
       title="Check-out"
-      description="Tela reservada para a proxima etapa do encerramento do atendimento."
-    >
-      <p className="section-description">
-        A base de navegacao ja esta pronta. Na proxima etapa podemos reaproveitar a logica do
-        check-in para registrar a saida.
-      </p>
-      <Link to="/check-in" className="text-link">
-        Ir para check-in
-      </Link>
-    </PageSection>
+      description="Registre o encerramento do atendimento com localizacao obrigatoria e envio ao Supabase."
+    />
   )
 }

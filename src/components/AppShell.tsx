@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import { useAttendanceSync } from '../hooks/useAttendanceSync'
 
 const navigationItems = [
   { to: '/', label: 'Inicio' },
@@ -9,6 +10,8 @@ const navigationItems = [
 ]
 
 export function AppShell() {
+  useAttendanceSync()
+
   return (
     <div className="app-shell">
       <header className="app-header">

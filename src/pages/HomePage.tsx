@@ -29,7 +29,7 @@ export function HomePage() {
     <div className="page-grid">
       <PageSection
         title="Inicio"
-        description="Base inicial do sistema web PWA para presenca e controle de atendimentos."
+        description="Acesso rapido as telas principais do sistema de presenca e atendimento."
       >
         <div className="action-grid">
           {quickActions.map((action) => (
@@ -42,14 +42,14 @@ export function HomePage() {
       </PageSection>
 
       <PageSection
-        title="O que ja esta pronto"
-        description="Nesta etapa focamos na base segura do sistema para evoluir nas proximas fases."
+        title="Etapa atual"
+        description="A aplicacao agora consegue registrar checks, listar atendimentos e exibir um painel inicial."
       >
         <ul className="info-list">
-          <li>Roteamento principal configurado para as telas do sistema.</li>
-          <li>Estrutura inicial para offline com IndexedDB preparada.</li>
-          <li>Cliente Supabase criado com variaveis de ambiente.</li>
-          <li>Tela de check-in pronta para primeira captura local.</li>
+          <li>Check-in e check-out com geolocalizacao automatica e obrigatoria.</li>
+          <li>Envio para a tabela attendance no Supabase quando configurado.</li>
+          <li>Pagina de atendimentos com carregamento remoto e estados de tela.</li>
+          <li>Painel administrativo com contadores e lista recente.</li>
         </ul>
       </PageSection>
     </div>
