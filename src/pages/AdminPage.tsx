@@ -11,10 +11,18 @@ export function AdminPage() {
 
   async function loadDashboard() {
     setIsLoading(true)
-    const result = await fetchAttendanceRecords()
-    setRecords(result.records)
-    setErrorMessage(result.errorMessage)
-    setIsLoading(false)
+    setErrorMessage(null)
+
+    try {
+      const result = await fetchAttendanceRecords()
+      setRecords(result.records)
+      setErrorMessage(result.errorMessage)
+    } catch (error) {
+      setRecords([])
+      setErrorMessage(getErrorMessage(error))
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -79,12 +87,13 @@ export function AdminPage() {
           {summary.recentRecords.map((record) => (
             <article key={record.id} className="record-card">
               <div className="record-row">
-                <strong>{record.patient_name}</strong>
+                <strong>{record.patient_name || 'Paciente nao informado'}</strong>
                 <span className="sync-pill synced">Registro</span>
               </div>
               <p>{formatDateTime(record.check_time)}</p>
               <p>
-                Latitude: {record.latitude.toFixed(6)} | Longitude: {record.longitude.toFixed(6)}
+                Latitude: {formatCoordinate(record.latitude)} | Longitude:{' '}
+                {formatCoordinate(record.longitude)}
               </p>
               <p>{record.observation || 'Sem observacao.'}</p>
             </article>
@@ -96,8 +105,30 @@ export function AdminPage() {
 }
 
 function formatDateTime(value: string) {
+  if (!value) {
+    return 'Horario indisponivel'
+  }
+
+  const parsedDate = new Date(value)
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return 'Horario indisponivel'
+  }
+
   return new Intl.DateTimeFormat('pt-BR', {
     dateStyle: 'short',
     timeStyle: 'short',
-  }).format(new Date(value))
+  }).format(parsedDate)
+}
+
+function formatCoordinate(value: number | null | undefined) {
+  return typeof value === 'number' && Number.isFinite(value) ? value.toFixed(6) : 'indisponivel'
+}
+
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    return error.message
+  }
+
+  return 'Nao foi possivel carregar o painel administrativo.'
 }

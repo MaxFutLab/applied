@@ -1,46 +1,46 @@
-# Applied — Roadmap
+# Applied - Roadmap
 
-## 🚀 Prioridade Alta (Essencial para operação)
+## Prioridade Alta (Essencial para operacao)
 
-### 🔐 Autenticação
+### Autenticacao
 
 * Implementar tela de login via email
-* Implementar recuperação de senha
+* Implementar recuperacao de senha
 * Implementar logout seguro
-* Proteger rotas privadas (usuário precisa estar autenticado)
+* Proteger rotas privadas (usuario precisa estar autenticado)
 
-### 📡 Sistema Offline
+### Sistema Offline
 
-* Validar sincronização offline em produção
-* Melhorar detecção de retorno de internet
+* Validar sincronizacao offline em producao
+* Melhorar deteccao de retorno de internet
 * Garantir que registros `pending` sincronizem corretamente
-* Mostrar status de sincronização mais claro para o usuário:
+* Mostrar status de sincronizacao mais claro para o usuario:
 
-  * `pending` → aguardando sincronização
-  * `syncing` → sincronizando
-  * `synced` → sincronizado
-  * `error` → erro ao sincronizar
+  * `pending` -> aguardando sincronizacao
+  * `syncing` -> sincronizando
+  * `synced` -> sincronizado
+  * `error` -> erro ao sincronizar
 
-### 🏢 Estrutura Multiempresa
+### Estrutura Multiempresa
 
-* Implementar suporte a múltiplas empresas
-* Cada empresa pode ter vários pacientes
-* Cada empresa pode ter vários profissionais
+* Implementar suporte a multiplas empresas
+* Cada empresa pode ter varios pacientes
+* Cada empresa pode ter varios profissionais
 * Garantir isolamento de dados entre empresas
 
 ---
 
-# 🧩 Prioridade Média (Estrutura do sistema)
+# Prioridade Media (Estrutura do sistema)
 
-### 👥 Sistema de Permissões
+### Sistema de Permissoes
 
 #### Admin
 
 * Gerencia empresas
-* Gerencia usuários
+* Gerencia usuarios
 * Acesso total
 
-#### Profissional N1 (Responsável)
+#### Profissional N1 (Responsavel)
 
 * Pode cadastrar pacientes
 * Pode gerenciar profissionais N2
@@ -53,30 +53,30 @@
 
 ---
 
-### 👨‍👩‍👧 Estrutura de Equipes
+### Estrutura de Equipes
 
-* Permitir que profissionais N1 tenham vários profissionais N2
-* Permitir que profissionais N2 participem de múltiplas equipes
+* Permitir que profissionais N1 tenham varios profissionais N2
+* Permitir que profissionais N2 participem de multiplas equipes
 * Garantir que cada equipe veja apenas os dados de seus pacientes
 
 ---
 
-### 📅 Estrutura de Atendimentos
+### Estrutura de Atendimentos
 
 Implementar modelo real de atendimento:
 
 * Check-in
 * Check-out
-* Cálculo da duração do atendimento
+* Calculo da duracao do atendimento
 
-Também implementar:
+Tambem implementar:
 
 * Rotina de atendimentos programados
-* Registro completo do histórico de atendimentos
+* Registro completo do historico de atendimentos
 
 ---
 
-### 🧾 Cadastros
+### Cadastros
 
 * Criar cadastro real de pacientes
 * Criar cadastro real de profissionais (ATs)
@@ -84,7 +84,7 @@ Também implementar:
 
 ---
 
-### 🔎 Histórico e Consulta
+### Historico e Consulta
 
 Permitir filtros por:
 
@@ -93,43 +93,61 @@ Permitir filtros por:
 * Data
 * Empresa
 
-Também implementar:
+Tambem implementar:
 
-* Botão de **sincronização manual**
-* **Painel administrativo**
+* Botao de sincronizacao manual
+* Painel administrativo
 
 ---
 
-# 📈 Prioridade Baixa (Melhorias e escalabilidade)
+# Prioridade Baixa (Melhorias e escalabilidade)
 
-### 🎨 Experiência do Usuário
+### Experiencia do Usuario
 
-* Transformar aplicação em **PWA instalável**
+* Transformar aplicacao em PWA instalavel
 * Melhorar layout visual
-* Otimizar experiência mobile
+* Otimizar experiencia mobile
 
 ---
 
-### 🔐 Segurança e Validação
+### Seguranca e Validacao
 
-* Validar distância do local esperado do atendimento
-* Melhorar precisão da geolocalização
-* Marcar registros suspeitos (possível fraude)
+* Validar distancia do local esperado do atendimento
+* Melhorar precisao da geolocalizacao
+* Marcar registros suspeitos (possivel fraude)
 
 ---
 
-### 📊 Análise e Gestão
+### Analise e Gestao
 
-* Criar relatórios de atendimentos
-* Criar métricas de produtividade
+* Criar relatorios de atendimentos
+* Criar metricas de produtividade
 * Exportar dados
 
 ---
 
-# 🌱 Futuro (Evolução do produto)
+# Futuro (Evolucao do produto)
 
 * Aplicativo mobile nativo
-* Notificações de atendimentos
+* Notificacoes de atendimentos
 * Agenda integrada
-* Integração com sistemas externos
-* Dashboard de gestão para clínicas
+* Integracao com sistemas externos
+* Dashboard de gestao para clinicas
+
+---
+
+# Atualizacao de Status
+
+## Concluido em 2026-03-12
+
+* Botao de sincronizacao manual implementado
+* Painel administrativo inicial implementado
+* Status visuais de sincronizacao (`pending`, `syncing`, `synced`, `error`) implementados
+* Protecao contra tela branca total adicionada na navegacao
+
+## Ainda pendente
+
+* Validar sincronizacao offline em producao
+* Melhorar deteccao de retorno de internet
+* Garantir consistencia do fluxo de check-out no modelo de dados remoto
+* Implementar autenticacao, multiempresa e cadastros reais

@@ -15,18 +15,28 @@ export function AttendanceListPage() {
 
   async function loadData() {
     setIsLoading(true)
+    setErrorMessage(null)
 
-    const [remoteResult, storedLocalRecords] = await Promise.all([
-      fetchAttendanceRecords(),
-      listAttendanceRecords(),
-    ])
+    try {
+      const [remoteResult, storedLocalRecords] = await Promise.all([
+        fetchAttendanceRecords(),
+        listAttendanceRecords(),
+      ])
 
-    setRemoteRecords(remoteResult.records)
-    setErrorMessage(remoteResult.errorMessage)
-    setLocalRecords(
-      [...storedLocalRecords].sort((first, second) => second.createdAt.localeCompare(first.createdAt)),
-    )
-    setIsLoading(false)
+      setRemoteRecords(remoteResult.records)
+      setErrorMessage(remoteResult.errorMessage)
+      setLocalRecords(
+        [...storedLocalRecords].sort((first, second) =>
+          (second.createdAt ?? '').localeCompare(first.createdAt ?? ''),
+        ),
+      )
+    } catch (error) {
+      setRemoteRecords([])
+      setLocalRecords([])
+      setErrorMessage(getErrorMessage(error))
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   async function handleManualSync() {
@@ -97,14 +107,15 @@ export function AttendanceListPage() {
             {remoteRecords.map((record) => (
               <article key={record.id} className="record-card">
                 <div className="record-row">
-                  <strong>{record.patient_name}</strong>
+                  <strong>{record.patient_name || 'Paciente nao informado'}</strong>
                   <span className="sync-pill synced">Supabase</span>
                 </div>
                 <p>{formatDateTime(record.check_time)}</p>
                 <p>
-                  Latitude: {record.latitude.toFixed(6)} | Longitude: {record.longitude.toFixed(6)}
+                  Latitude: {formatCoordinate(record.latitude)} | Longitude:{' '}
+                  {formatCoordinate(record.longitude)}
                 </p>
-                <p>Accuracy: {Math.round(record.accuracy)} m</p>
+                <p>Accuracy: {formatAccuracy(record.accuracy)}</p>
                 <p>{record.observation || 'Sem observacao.'}</p>
               </article>
             ))}
@@ -123,15 +134,16 @@ export function AttendanceListPage() {
             {localRecords.map((record) => (
               <article key={record.localId} className="record-card">
                 <div className="record-row">
-                  <strong>{record.patient_name}</strong>
+                  <strong>{record.patient_name || record.patientName || 'Paciente nao informado'}</strong>
                   <span className={`sync-pill ${record.syncStatus}`}>{record.syncStatus}</span>
                 </div>
-                <p>{record.check_type}</p>
+                <p>{record.check_type || record.checkType || 'tipo nao informado'}</p>
                 <p>{formatDateTime(record.recordedAt)}</p>
                 <p>
-                  Latitude: {record.latitude.toFixed(6)} | Longitude: {record.longitude.toFixed(6)}
+                  Latitude: {formatCoordinate(record.latitude)} | Longitude:{' '}
+                  {formatCoordinate(record.longitude)}
                 </p>
-                <p>Accuracy: {Math.round(record.accuracy_meters)} m</p>
+                <p>Accuracy: {formatAccuracy(record.accuracy_meters)}</p>
                 <p>{record.notes || 'Sem observacao.'}</p>
                 {record.syncErrorMessage ? (
                   <p className="sync-error-text">{record.syncErrorMessage}</p>
@@ -154,8 +166,36 @@ function buildSyncMessage(result: SyncRunResult) {
 }
 
 function formatDateTime(value: string) {
+  if (!value) {
+    return 'Horario indisponivel'
+  }
+
+  const parsedDate = new Date(value)
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return 'Horario indisponivel'
+  }
+
   return new Intl.DateTimeFormat('pt-BR', {
     dateStyle: 'short',
     timeStyle: 'short',
-  }).format(new Date(value))
+  }).format(parsedDate)
+}
+
+function formatCoordinate(value: number | null | undefined) {
+  return typeof value === 'number' && Number.isFinite(value) ? value.toFixed(6) : 'indisponivel'
+}
+
+function formatAccuracy(value: number | null | undefined) {
+  return typeof value === 'number' && Number.isFinite(value)
+    ? `${Math.round(value)} m`
+    : 'indisponivel'
+}
+
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    return error.message
+  }
+
+  return 'Nao foi possivel carregar a pagina de atendimentos.'
 }

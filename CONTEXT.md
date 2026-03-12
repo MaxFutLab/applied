@@ -60,6 +60,7 @@ Arquivos principais da integracao:
 
 ## 7. Funcionalidades ja implementadas
 - roteamento com `BrowserRouter`
+- boundary global de erro para evitar tela branca total em falha de rota ou renderizacao
 - Home com navegacao para as telas principais
 - check-in com geolocalizacao automatica e obrigatoria
 - check-out com a mesma base de formulario
@@ -106,6 +107,7 @@ Comportamento atual:
 - nao ha filtros, busca ou paginacao no historico
 - painel administrativo ainda e inicial
 - sincronizacao offline ainda precisa de validacao mais forte em producao
+- telas que exibem historico dependem de renderizacao defensiva para lidar com dados antigos ou incompletos
 - nao ha estrutura multiempresa, equipes ou perfis de permissao
 - validacao de distancia, antifraude e melhoria de GPS ainda nao existem
 - PWA esta configurada, mas a estrategia completa de instalacao e cache ainda precisa evoluir
