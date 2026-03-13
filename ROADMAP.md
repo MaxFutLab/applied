@@ -147,6 +147,7 @@ Tambem implementar:
 * Login simples com email e senha via Supabase Auth implementado
 * Logout funcional implementado
 * Protecao de rotas privadas implementada
+* Isolamento dos registros offline por usuario autenticado implementado
 
 ## Ainda pendente
 
@@ -154,4 +155,5 @@ Tambem implementar:
 * Melhorar deteccao de retorno de internet
 * Garantir consistencia do fluxo de check-out no modelo de dados remoto
 * Evoluir autenticacao para perfis, permissoes e multi equipes
+* Evoluir isolamento local de usuario para contexto de equipes e empresa
 * Implementar cadastros reais

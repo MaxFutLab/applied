@@ -25,6 +25,9 @@ export async function createAttendanceRecord(
 
   const localRecord: AttendanceRecord = {
     localId,
+    ownerUserId: input.ownerUserId,
+    ownerUserEmail: input.ownerUserEmail ?? null,
+    ownerScopeKey: input.ownerScopeKey,
     patientId: input.patientId,
     patientName: input.patientName,
     patient_name: input.patientName,
@@ -141,6 +144,14 @@ export async function uploadAttendanceRecord(record: AttendanceRecord) {
       success: false,
       shouldRetry: true,
       message: getOfflineMessage(),
+    }
+  }
+
+  if (!record.ownerUserId) {
+    return {
+      success: false,
+      shouldRetry: false,
+      message: 'Registro local sem usuario vinculado. Sincronizacao bloqueada.',
     }
   }
 

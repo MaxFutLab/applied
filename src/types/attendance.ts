@@ -22,6 +22,9 @@ export type AttendanceLocation = {
 export type AttendanceRecord = {
   localId: string
   remoteId?: string
+  ownerUserId: string | null
+  ownerUserEmail?: string | null
+  ownerScopeKey: string | null
   patientId: string
   patientName: string
   patient_name: string
@@ -59,6 +62,9 @@ export type AttendanceRow = AttendanceInsert & {
 }
 
 export type CreateAttendanceInput = {
+  ownerUserId: string | null
+  ownerUserEmail?: string | null
+  ownerScopeKey: string | null
   patientId: string
   patientName: string
   professionalId: string

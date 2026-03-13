@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { PageSection } from '../components/PageSection'
-import { listAttendanceRecords } from '../lib/db/indexedDb'
+import { listAttendanceRecordsByUser } from '../lib/db/indexedDb'
 import { syncPendingAttendanceRecords } from '../lib/sync/attendanceSync'
+import { useAuth } from '../hooks/useAuth'
 import { fetchAttendanceRecords } from '../services/attendanceService'
 import type { AttendanceRecord, AttendanceRow, SyncRunResult } from '../types/attendance'
 
 export function AttendanceListPage() {
+  const { user } = useAuth()
   const [remoteRecords, setRemoteRecords] = useState<AttendanceRow[]>([])
   const [localRecords, setLocalRecords] = useState<AttendanceRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -13,14 +15,14 @@ export function AttendanceListPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [syncMessage, setSyncMessage] = useState<string | null>(null)
 
-  async function loadData() {
+  const loadData = useCallback(async () => {
     setIsLoading(true)
     setErrorMessage(null)
 
     try {
       const [remoteResult, storedLocalRecords] = await Promise.all([
         fetchAttendanceRecords(),
-        listAttendanceRecords(),
+        listAttendanceRecordsByUser(user?.id ?? null),
       ])
 
       setRemoteRecords(remoteResult.records)
@@ -37,13 +39,13 @@ export function AttendanceListPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [user?.id])
 
   async function handleManualSync() {
     setIsSyncing(true)
     setSyncMessage(null)
 
-    const result = await syncPendingAttendanceRecords()
+    const result = await syncPendingAttendanceRecords(user?.id ?? null)
     setSyncMessage(buildSyncMessage(result))
 
     await loadData()
@@ -56,7 +58,7 @@ export function AttendanceListPage() {
     }, 0)
 
     function handleOnline() {
-      void syncPendingAttendanceRecords().then((result) => {
+      void syncPendingAttendanceRecords(user?.id ?? null).then((result) => {
         setSyncMessage(buildSyncMessage(result))
         void loadData()
       })
@@ -68,7 +70,7 @@ export function AttendanceListPage() {
       window.clearTimeout(timerId)
       window.removeEventListener('online', handleOnline)
     }
-  }, [])
+  }, [loadData, user?.id])
 
   return (
     <div className="page-grid">

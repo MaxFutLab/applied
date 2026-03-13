@@ -33,11 +33,12 @@ Registrar check-in e check-out com horario e geolocalizacao, permitir uso offlin
 2. `AttendanceForm` inicia captura automatica da geolocalizacao.
 3. Ao confirmar, o app monta um registro local com `localId`.
 4. O registro e salvo primeiro no IndexedDB.
-5. Se houver internet e Supabase configurado, o status muda para `syncing` e o app faz `upsert` na tabela `attendance`.
-6. Em sucesso, o registro local vira `synced`.
-7. Em falha temporaria, o registro volta para `pending`.
-8. Em falha nao recuperavel, o registro vira `error`.
-9. A fila pode ser sincronizada automaticamente no inicio do app, no evento `online` e manualmente pela tela de atendimentos.
+5. Cada registro offline recebe vinculacao ao usuario autenticado (`ownerUserId`).
+6. Se houver internet, sessao autenticada e Supabase configurado, o status muda para `syncing` e o app faz `upsert` na tabela `attendance`.
+7. Em sucesso, o registro local vira `synced`.
+8. Em falha temporaria, o registro volta para `pending`.
+9. Em falha nao recuperavel, o registro vira `error`.
+10. A fila sincroniza apenas registros pertencentes ao usuario logado, automaticamente no inicio do app, no evento `online` e manualmente pela tela de atendimentos.
 
 ## 6. Integracao com Supabase (tabelas e campos utilizados)
 Tabela padrao atual:
@@ -72,6 +73,7 @@ Arquivos principais da integracao:
 - salvamento local com IndexedDB
 - fila de sincronizacao offline
 - sincronizacao automatica e manual
+- isolamento dos registros offline por usuario autenticado
 - lista de atendimentos remotos e locais
 - painel administrativo inicial
 - configuracao PWA basica
@@ -90,6 +92,9 @@ Estados:
 
 Comportamento atual:
 - salva local mesmo sem internet
+- mantem registros pendentes no navegador mesmo apos logout
+- filtra registros locais pelo usuario autenticado
+- impede sincronizacao cruzada entre usuarios diferentes no mesmo navegador
 - tenta sincronizar no carregamento do app
 - tenta sincronizar quando o navegador volta a ficar online
 - permite sincronizacao manual com botao
@@ -110,6 +115,7 @@ Comportamento atual:
 - nao ha autenticacao, autorizacao ou protecao de rotas
 - a tabela `attendance` nao diferencia explicitamente o tipo remoto de registro entre check-in e check-out
 - ainda nao ha estrutura real de equipes, perfis ou selecao de contexto organizacional apos o login
+- a tabela remota `attendance` continua sem identificador organizacional ou de equipe nesta etapa
 - nao ha filtros, busca ou paginacao no historico
 - painel administrativo ainda e inicial
 - sincronizacao offline ainda precisa de validacao mais forte em producao

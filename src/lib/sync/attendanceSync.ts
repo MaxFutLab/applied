@@ -1,5 +1,5 @@
 import {
-  listQueuedAttendanceRecords,
+  listQueuedAttendanceRecordsByUser,
   markAttendanceAsError,
   markAttendanceAsSynced,
   updateAttendanceSyncStatus,
@@ -10,20 +10,29 @@ import type { SyncRunResult } from '../../types/attendance'
 
 let syncInFlight: Promise<SyncRunResult> | null = null
 
-export function syncPendingAttendanceRecords(): Promise<SyncRunResult> {
+export function syncPendingAttendanceRecords(ownerUserId: string | null): Promise<SyncRunResult> {
   if (syncInFlight) {
     return syncInFlight
   }
 
-  syncInFlight = runSync().finally(() => {
+  syncInFlight = runSync(ownerUserId).finally(() => {
     syncInFlight = null
   })
 
   return syncInFlight
 }
 
-async function runSync(): Promise<SyncRunResult> {
-  const queuedRecords = await listQueuedAttendanceRecords()
+async function runSync(ownerUserId: string | null): Promise<SyncRunResult> {
+  if (!ownerUserId) {
+    return {
+      attempted: 0,
+      synced: 0,
+      failed: 0,
+      skipped: 0,
+    }
+  }
+
+  const queuedRecords = await listQueuedAttendanceRecordsByUser(ownerUserId)
 
   if (!isSupabaseConfigured || typeof navigator !== 'undefined' && !navigator.onLine) {
     return {

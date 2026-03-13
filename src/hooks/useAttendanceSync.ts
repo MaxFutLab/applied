@@ -1,12 +1,19 @@
 import { useEffect } from 'react'
+import { useAuth } from './useAuth'
 import { syncPendingAttendanceRecords } from '../lib/sync/attendanceSync'
 
 export function useAttendanceSync() {
+  const { isAuthenticated, isLoading, user } = useAuth()
+
   useEffect(() => {
-    void syncPendingAttendanceRecords()
+    if (isLoading || !isAuthenticated) {
+      return
+    }
+
+    void syncPendingAttendanceRecords(user?.id ?? null)
 
     function handleOnline() {
-      void syncPendingAttendanceRecords()
+      void syncPendingAttendanceRecords(user?.id ?? null)
     }
 
     window.addEventListener('online', handleOnline)
@@ -14,5 +21,5 @@ export function useAttendanceSync() {
     return () => {
       window.removeEventListener('online', handleOnline)
     }
-  }, [])
+  }, [isAuthenticated, isLoading, user?.id])
 }

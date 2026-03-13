@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { PageSection } from './PageSection'
+import { useAuth } from '../hooks/useAuth'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { createAttendanceRecord } from '../services/attendanceService'
 import { getMockPatients, getMockProfessionals } from '../services/mockData'
@@ -16,6 +17,7 @@ const patients = getMockPatients()
 const defaultProfessional = getMockProfessionals()[0]
 
 export function AttendanceForm({ checkType, title, description }: AttendanceFormProps) {
+  const { user } = useAuth()
   const [selectedPatientId, setSelectedPatientId] = useState(patients[0]?.id ?? '')
   const [notes, setNotes] = useState('')
   const [currentTime, setCurrentTime] = useState(new Date().toISOString())
@@ -68,6 +70,9 @@ export function AttendanceForm({ checkType, title, description }: AttendanceForm
     try {
       const result: CreateAttendanceResult = await createAttendanceRecord({
         patientId: selectedPatient.id,
+        ownerUserId: user?.id ?? null,
+        ownerUserEmail: user?.email ?? null,
+        ownerScopeKey: user?.id ?? null,
         patientName: selectedPatient.name,
         professionalId: defaultProfessional.id,
         professionalName: defaultProfessional.name,
@@ -96,6 +101,7 @@ export function AttendanceForm({ checkType, title, description }: AttendanceForm
     permissionStatus !== 'denied' &&
     currentLocation?.latitude != null &&
     currentLocation.longitude != null &&
+    Boolean(user?.id) &&
     !isLoading &&
     !isSubmitting
 

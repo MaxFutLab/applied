@@ -30,6 +30,11 @@ export async function listAttendanceRecords() {
   return database.getAllFromIndex(ATTENDANCE_STORE, 'by-created-at')
 }
 
+export async function listAttendanceRecordsByUser(ownerUserId: string | null) {
+  const records = await listAttendanceRecords()
+  return records.filter((record) => record.ownerUserId === ownerUserId)
+}
+
 export async function listPendingAttendanceRecords() {
   const database = await getDatabase()
   return database.getAllFromIndex(ATTENDANCE_STORE, 'by-sync-status', 'pending')
@@ -39,6 +44,11 @@ export async function listQueuedAttendanceRecords() {
   const database = await getDatabase()
   const records = await database.getAll(ATTENDANCE_STORE)
   return records.filter((record) => record.syncStatus === 'pending' || record.syncStatus === 'error')
+}
+
+export async function listQueuedAttendanceRecordsByUser(ownerUserId: string | null) {
+  const records = await listQueuedAttendanceRecords()
+  return records.filter((record) => record.ownerUserId === ownerUserId)
 }
 
 export async function markAttendanceAsSynced(localId: string, remoteId?: string) {

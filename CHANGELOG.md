@@ -38,6 +38,23 @@
 ### Banco de dados
 - sem alteracoes no schema
 
+## 2026-03-13 - isolamento de sincronizacao offline por usuario
+### Implementado
+- vinculacao do registro offline ao usuario autenticado no momento do salvamento
+- filtro da fila local para sincronizar apenas registros do usuario logado
+- preservacao dos pendentes no navegador apos logout
+- bloqueio de sincronizacao cruzada entre usuarios diferentes no mesmo dispositivo
+- ajuste da listagem local para exibir apenas registros do usuario autenticado
+
+### Arquivos/areas impactadas
+- IndexedDB
+- sincronizacao offline
+- autenticacao
+- pagina de atendimentos
+
+### Banco de dados
+- sem alteracoes no schema
+
 ## 2026-03-13 - login simples com Supabase Auth
 ### Implementado
 - pagina `LoginPage` com email, senha, loading e tratamento de erro
