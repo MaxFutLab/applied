@@ -37,3 +37,21 @@
 
 ### Banco de dados
 - sem alteracoes no schema
+
+## 2026-03-13 - login simples com Supabase Auth
+### Implementado
+- pagina `LoginPage` com email, senha, loading e tratamento de erro
+- `AuthProvider` reutilizavel com sessao, usuario autenticado e logout
+- protecao das rotas privadas com redirecionamento para `/login`
+- redirecionamento automatico de usuario autenticado ao acessar `/login`
+- logout funcional no `AppShell`
+- base preparada para futura evolucao de multi equipes via contexto de autenticacao
+
+### Arquivos/areas impactadas
+- autenticacao frontend
+- roteamento React
+- shell principal da aplicacao
+- documentacao do projeto
+
+### Banco de dados
+- sem alteracoes no schema

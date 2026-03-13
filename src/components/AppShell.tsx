@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
 import { useAttendanceSync } from '../hooks/useAttendanceSync'
 
 const navigationItems = [
@@ -10,17 +11,32 @@ const navigationItems = [
 ]
 
 export function AppShell() {
+  const { user, signOut, isLoading } = useAuth()
   useAttendanceSync()
 
   return (
     <div className="app-shell">
       <header className="app-header">
-        <div>
-          <p className="eyebrow">Applied</p>
-          <h1>Sistema de presenca para ATs</h1>
-          <p className="subtitle">
-            Controle simples de check-in, check-out e sincronizacao de atendimentos.
-          </p>
+        <div className="app-header-row">
+          <div>
+            <p className="eyebrow">Applied</p>
+            <h1>Sistema de presenca para ATs</h1>
+            <p className="subtitle">
+              Controle simples de check-in, check-out e sincronizacao de atendimentos.
+            </p>
+          </div>
+
+          <div className="auth-toolbar">
+            <span className="auth-user">{user?.email || 'Usuario autenticado'}</span>
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => void signOut()}
+              disabled={isLoading}
+            >
+              Sair
+            </button>
+          </div>
         </div>
       </header>
 

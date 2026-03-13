@@ -61,6 +61,10 @@ Arquivos principais da integracao:
 ## 7. Funcionalidades ja implementadas
 - roteamento com `BrowserRouter`
 - boundary global de erro para evitar tela branca total em falha de rota ou renderizacao
+- autenticacao com Supabase Auth por email e senha
+- logout funcional
+- protecao de rotas privadas com redirecionamento para `/login`
+- provider de autenticacao reutilizavel, preparado para futura evolucao de multi equipes
 - Home com navegacao para as telas principais
 - check-in com geolocalizacao automatica e obrigatoria
 - check-out com a mesma base de formulario
@@ -95,6 +99,7 @@ Comportamento atual:
 - deploy na Vercel
 - `vercel.json` com rewrite global para `/index.html`
 - `main.tsx` usa `BrowserRouter`
+- `/login` funciona como rota publica e as demais rotas principais sao privadas
 - `vite.config.ts` ativa PWA com `vite-plugin-pwa`
 - variaveis esperadas:
   - `VITE_SUPABASE_URL`
@@ -104,6 +109,7 @@ Comportamento atual:
 - pacientes e profissionais ainda usam dados mockados
 - nao ha autenticacao, autorizacao ou protecao de rotas
 - a tabela `attendance` nao diferencia explicitamente o tipo remoto de registro entre check-in e check-out
+- ainda nao ha estrutura real de equipes, perfis ou selecao de contexto organizacional apos o login
 - nao ha filtros, busca ou paginacao no historico
 - painel administrativo ainda e inicial
 - sincronizacao offline ainda precisa de validacao mais forte em producao

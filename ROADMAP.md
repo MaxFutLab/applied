@@ -144,10 +144,14 @@ Tambem implementar:
 * Painel administrativo inicial implementado
 * Status visuais de sincronizacao (`pending`, `syncing`, `synced`, `error`) implementados
 * Protecao contra tela branca total adicionada na navegacao
+* Login simples com email e senha via Supabase Auth implementado
+* Logout funcional implementado
+* Protecao de rotas privadas implementada
 
 ## Ainda pendente
 
 * Validar sincronizacao offline em producao
 * Melhorar deteccao de retorno de internet
 * Garantir consistencia do fluxo de check-out no modelo de dados remoto
-* Implementar autenticacao, multiempresa e cadastros reais
+* Evoluir autenticacao para perfis, permissoes e multi equipes
+* Implementar cadastros reais
